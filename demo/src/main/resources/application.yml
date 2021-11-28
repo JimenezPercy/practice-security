@@ -1,0 +1,28 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    driver-class-name:  com.mysql.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3307/demo?useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+    username: root
+    password: 123456
+  session:
+    store-type: none
+
+#debug: true
+
+#security:
+#  basic:
+#    enabled: false
+
+practice:
+  security:
+    browser:
+#      loginPage: /demo-signIn.html
+      loginType: JSON
+    code:
+      image:
+        length: 6
+        width: 100
+#        url: /user
