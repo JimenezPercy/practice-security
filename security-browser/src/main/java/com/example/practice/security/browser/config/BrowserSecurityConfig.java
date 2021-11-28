@@ -3,10 +3,13 @@ package com.example.practice.security.browser.config;
 import com.example.practice.security.browser.authentication.PracticeAuthenticationFailureHandler;
 import com.example.practice.security.browser.authentication.PracticeAuthenticationSuccessHandler;
 import com.example.practice.security.browser.service.MyUserDetailService;
+import com.example.practice.security.core.authentication.AbstractChannelSecurityConfig;
 import com.example.practice.security.core.authentication.mobile.SmsCodeAuthenticationFilter;
 import com.example.practice.security.core.authentication.mobile.SmsCodeAuthenticationSecurityConfig;
+import com.example.practice.security.core.constants.SecurityConstants;
 import com.example.practice.security.core.properties.SecurityProperties;
 import com.example.practice.security.core.validate.code.ValidateCodeFilter;
+import com.example.practice.security.core.validate.code.ValidateCodeSecurityConfig;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -27,46 +30,41 @@ import javax.sql.DataSource;
 @Configuration
 @EnableWebSecurity
 @AllArgsConstructor
-public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
+public class BrowserSecurityConfig extends AbstractChannelSecurityConfig {
 
     private final SecurityProperties securityProperties;
-    private final PracticeAuthenticationSuccessHandler practiceAuthenticationSuccessHandler;
-    private final PracticeAuthenticationFailureHandler practiceAuthenticationFailureHandler;
-    //验证码过滤器
-    private final ValidateCodeFilter validateCodeFilter;
+
+    private final ValidateCodeSecurityConfig validateCodeSecurityConfig;
 
     private final SmsCodeAuthenticationSecurityConfig smsCodeAuthenticationSecurityConfig;
 
     private final UserDetailsService userDetailsService;
 
     private final PersistentTokenRepository persistentTokenRepository;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        applyPasswordAuthenticationConfig(http);
 
-        http.addFilterBefore(validateCodeFilter, UsernamePasswordAuthenticationFilter.class)
-                .formLogin()
-                .successHandler(practiceAuthenticationSuccessHandler)
-                .failureHandler(practiceAuthenticationFailureHandler)
-                .loginPage("/authentication/require")
-                .loginProcessingUrl("/authentication/form")
-                .and()
-                .rememberMe()
-                .tokenRepository(persistentTokenRepository)
-                .tokenValiditySeconds(securityProperties.getBrowser().getRememberMeSeconds())
-                .userDetailsService(userDetailsService)
-                .and()
+        http.rememberMe()
+                    .tokenRepository(persistentTokenRepository)
+                    .tokenValiditySeconds(securityProperties.getBrowser().getRememberMeSeconds())
+                    .userDetailsService(userDetailsService)
+                    .and()
                 .authorizeRequests()
-                .antMatchers("/authentication/require",
-                        "/code/image",
-                        "/code/sms",
-                        "/code/*",
-                        securityProperties.getBrowser().getLoginPage())
-                .permitAll()
-                .anyRequest()
-                .authenticated()
-                .and()
+                    .antMatchers(
+                            SecurityConstants.DEFAULT_UNAUTHENTICATION_URL,
+                            SecurityConstants.DEFAULT_LOGIN_PROCESSING_URL_MOBILE,
+                            SecurityConstants.DEFAULT_VALIDATE_CODE_URL_PREFIX+"/*",
+                            securityProperties.getBrowser().getLoginPage())
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated()
+                    .and()
                 .csrf()
-                .disable()
+                    .disable()
+                .apply(validateCodeSecurityConfig)
+                    .and()
                 .apply(smsCodeAuthenticationSecurityConfig);
     }
 }
