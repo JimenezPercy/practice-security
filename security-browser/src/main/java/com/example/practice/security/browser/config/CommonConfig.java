@@ -1,6 +1,5 @@
 package com.example.practice.security.browser.config;
 
-import com.example.practice.security.browser.service.MyUserDetailService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,13 +16,6 @@ import javax.sql.DataSource;
 public class CommonConfig {
 
     private final DataSource dataSource;
-
-    @Bean
-    public UserDetailsService myUserDetailService() {
-        MyUserDetailService myUserDetailService = new MyUserDetailService();
-        myUserDetailService.setPasswordEncoder(passwordEncoder());
-        return myUserDetailService;
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

@@ -26,3 +26,8 @@ practice:
         length: 6
         width: 100
 #        url: /user
+    social:
+      filter-processes-url: /auth
+      qq:
+        app-id: 101386962
+        app-secret: 2a0f820407df400b84a854d054be8b6a

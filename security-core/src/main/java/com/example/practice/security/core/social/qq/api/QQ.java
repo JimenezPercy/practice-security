@@ -8,5 +8,5 @@ public interface QQ {
      *
      * @return
      */
-    QQUserInfo getUserInfo() throws IOException;
+    QQUserInfo getUserInfo();
 }
